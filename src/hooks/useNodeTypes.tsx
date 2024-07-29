@@ -9,7 +9,9 @@ export const useNodeTypes = (): NodeTypes => {
   );
 
   return useMemo<NodeTypes>(() => {
-    const allNodeTypes: Record<string, React.FC<any>> = {};
+    const allNodeTypes: Record<string, React.FC<any>> = {
+      ...specificNodeTypes,
+    };
 
     Object.keys(specificNodeTypes).forEach((key) => {
       allNodeTypes[key] = specificNodeTypes[key];

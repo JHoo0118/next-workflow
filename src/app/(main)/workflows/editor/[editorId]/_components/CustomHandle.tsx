@@ -44,7 +44,7 @@ const CustomHandle = (props: Props) => {
 
         return !handleState;
       }}
-      className="!-bottom-2 !h-4 !w-4 dark:bg-neutral-800"
+      className="!-bottom-2 !h-4 !w-4 !bg-neutral-400 dark:!bg-neutral-800"
     />
   );
 };

@@ -3,6 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditorCanvasTypes, EditorNodeType } from "@/lib/types";
 import { useEditor } from "@/providers/EditorProvider";
 
+import CustomModal from "@/components/global/CustomModal";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -13,12 +15,15 @@ import { Separator } from "@/components/ui/separator";
 import { mappingComponentTypeName } from "@/lib/constant";
 import { onDragStart } from "@/lib/editorUtils";
 import { useNodeConnections } from "@/providers/ConnectionsProvider";
+import { useModal } from "@/providers/ModalProvider";
 import {
   editCanvasCardComponents,
   useEditCanvasCardStore,
 } from "@/store/editCanvasStore";
 import useTabStore from "@/store/tabStore";
+import { Plus } from "lucide-react";
 import EditorCanvasIconHelper from "./EditorCanvasCardIconHepler";
+import NewNodeForm from "./NewNodeForm";
 
 type Props = {
   nodes: EditorNodeType[];
@@ -29,6 +34,7 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
   const { nodeConnection } = useNodeConnections();
   const { filteredCards } = useEditCanvasCardStore();
   const { tab, setTab } = useTabStore();
+  const { setOpen } = useModal();
 
   return (
     <aside>
@@ -42,11 +48,28 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
             액션
           </TabsTrigger>
           <TabsTrigger value="details" onClick={() => setTab("details")}>
-            설정
+            상세
           </TabsTrigger>
         </TabsList>
         <Separator />
         <TabsContent value="actions" className="flex flex-col gap-4 p-4">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setOpen(
+                <CustomModal
+                  title="사용자 정의 노드 만들기"
+                  subheading="노드 이름과 설명을 작성해 주세요."
+                  size="h-[34rem]"
+                >
+                  <NewNodeForm />
+                </CustomModal>
+              );
+            }}
+          >
+            <Plus className="mr-2" />
+            노드 추가하기
+          </Button>
           {editCanvasCardComponents.map((componentType) => (
             <>
               <h3>{mappingComponentTypeName[componentType]}</h3>

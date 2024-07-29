@@ -1,23 +1,26 @@
 "use client";
-import CustomModal from "@/components/global/CustomModal";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useNodeTypes } from "@/hooks/useNodeTypes";
-import { EditorCanvasCardType, EditorNodeType } from "@/lib/types";
+import {
+  EditorCanvasCardType,
+  EditorCanvasTypes,
+  EditorNodeType,
+} from "@/lib/types";
 import { useEditor } from "@/providers/EditorProvider";
 import { useModal } from "@/providers/ModalProvider";
 import { useEditCanvasNodeStore } from "@/store/editCanvasNodeStore";
-import { useEditCanvasCardStore } from "@/store/editCanvasStore";
+import { Card, useEditCanvasCardStore } from "@/store/editCanvasStore";
 import useTabStore from "@/store/tabStore";
-import "@xyflow/react/dist/style.css";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   Background,
   Connection,
+  Controls,
   Edge,
   EdgeChange,
   MarkerType,
@@ -32,9 +35,11 @@ import "reactflow/dist/style.css";
 import { v4 } from "uuid";
 import { onGetNodesEdges } from "../../../_actions/WorkflowConnections";
 import EditorCanvasCardMany from "./EditorCanvasCardMany";
+import EditorCanvasCardSimple from "./EditorCanvasCardSimple";
+import EditorCanvasCardSingleEnd from "./EditorCanvasCardSingleEnd";
+import EditorCanvasCardSingleStart from "./EditorCanvasCardSingleStart";
 import EditorCanvasSidebar from "./EditorCanvasSidebar";
 import FlowInstance from "./FlowInstance";
-import NewNodeForm from "./NewNodeForm";
 
 type Props = {};
 
@@ -44,17 +49,18 @@ const initialEdges: { id: string; source: string; target: string }[] = [];
 
 const EditorCanvas = (props: Props) => {
   const { dispatch, state } = useEditor();
-  const { setOpen, setClose } = useModal();
+  const { setOpen } = useModal();
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
   const [isWorkFlowLoading, setIsWorkFlowLoading] = useState<boolean>(false);
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance>();
   const pathname = usePathname();
-  const { cards } = useEditCanvasCardStore();
+  const { cards, addCards } = useEditCanvasCardStore();
   const { setTab } = useTabStore();
   const nodeTypes = useNodeTypes();
-  const { addNodeType } = useEditCanvasNodeStore();
+
+  const { addNodeType, addNodeTypes } = useEditCanvasNodeStore();
   const specificNodeTypes = useEditCanvasNodeStore(
     (state) => state.specificNodeTypes
   );
@@ -107,7 +113,19 @@ const EditorCanvas = (props: Props) => {
       }
 
       if (!(type in specificNodeTypes)) {
-        addNodeType(type, EditorCanvasCardMany);
+        if (cards[type]?.cardType) {
+          if (cards[type]?.cardType === "Start") {
+            addNodeType(type, EditorCanvasCardSingleStart);
+          } else if (cards[type]?.cardType === "End") {
+            addNodeType(type, EditorCanvasCardSingleEnd);
+          } else if (cards[type]?.cardType === "Text") {
+            addNodeType(type, EditorCanvasCardSimple);
+          } else {
+            addNodeType(type, EditorCanvasCardMany);
+          }
+        } else {
+          addNodeType(type, EditorCanvasCardMany);
+        }
       }
 
       // const triggerAlreadyExists = state.editor.elements.find(
@@ -123,18 +141,6 @@ const EditorCanvas = (props: Props) => {
         x: event.clientX,
         y: event.clientY,
       });
-
-      if (type === "Custom Server") {
-        setOpen(
-          <CustomModal
-            title="사용자 정의 노드 만들기"
-            subheading="노드 이름과 설명을 작성해 주세요."
-          >
-            <NewNodeForm type={type} setNodes={setNodes} position={position} />
-          </CustomModal>
-        );
-        return;
-      }
 
       const newNode = {
         id: v4(),
@@ -181,27 +187,43 @@ const EditorCanvas = (props: Props) => {
     dispatch({ type: "LOAD_DATA", payload: { edges, elements: nodes } });
   }, [nodes, edges, dispatch]);
 
-  // const nodeTypes = useMemo(
-  //   () => ({
-  //     Web: EditorCanvasCardSingle,
-  //     App: EditorCanvasCardSingle,
-  //     Trigger: EditorCanvasCardSingle,
-  //     "Spring Cloud Gateway": EditorCanvasCardOneToMany,
-  //     "Custom Server": EditorCanvasCardOneToMany,
-  //     "Eureka Discovery": EditorCanvasCardOneToMany,
-  //     "User Service": EditorCanvasCardOneToMany,
-  //     Feign: EditorCanvasCardSimple,
-  //     Kafka: EditorCanvasCardSimple,
-  //   }),
-  //   []
-  // );
-
   const onGetWorkFlow = useCallback(async () => {
     setIsWorkFlowLoading(true);
     const response = await onGetNodesEdges(pathname.split("/").pop()!);
     if (response) {
+      const nodes: any[] = JSON.parse(response.nodes!);
+      const newCards: Record<string, Card> = {};
+      const newNodes: Record<EditorCanvasTypes, React.FC<any>> = {};
+      nodes.map((node) => {
+        const { type } = node;
+        if (!(type in cards)) {
+          const {
+            data: { title, type, description, componentType, cardType },
+          } = node;
+          const newCard: Card = {
+            name: title,
+            type,
+            description,
+            componentType,
+            cardType,
+          };
+          newCards[type] = newCard;
+          if (cardType === "Start") {
+            newNodes[type] = EditorCanvasCardSingleStart;
+          } else if (cardType === "End") {
+            newNodes[type] = EditorCanvasCardSingleEnd;
+          } else if (cardType === "Text") {
+            newNodes[type] = EditorCanvasCardSimple;
+          } else {
+            newNodes[type] = EditorCanvasCardMany;
+          }
+        }
+      });
+
+      addCards(newCards);
+      addNodeTypes(newNodes);
       setEdges(JSON.parse(response.edges!));
-      setNodes(JSON.parse(response.nodes!));
+      setNodes(nodes);
       setIsWorkFlowLoading(false);
     }
     setIsWorkFlowLoading(false);
@@ -260,7 +282,7 @@ const EditorCanvas = (props: Props) => {
                 onEdgeUpdate={onEdgeUpdate}
                 nodeTypes={nodeTypes}
               >
-                {/* <Controls position="top-left" /> */}
+                <Controls position="top-left" />
                 {/* <MiniMap
                   position="bottom-left"
                   className="!bg-background"

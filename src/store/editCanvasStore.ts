@@ -5,27 +5,17 @@ export type Card = {
   description: string;
   type: EditCanvasCardType;
   componentType: EditCanvasCardComponentType;
-  order?: number;
+  cardType?: EditCanvasCardCardType;
 };
 
 type CardsState = {
   cards: Record<string, Card>;
   filteredCards: Record<EditCanvasCardComponentType, Record<string, Card>>;
   addCard: (key: string, card: Card) => void;
-  addCards: (newCards: Record<string, Card>) => void;
+  addCards: (newCards: Record<string, any>) => void;
   updateCard: (key: string, card: Partial<Card>) => void;
   deleteCard: (key: string) => void;
   filterCards: () => void;
-};
-
-export const CustomServer: Record<string, Card> = {
-  "Custom Server": {
-    name: "사용자 정의 서버",
-    description: "사용자 정의 모듈",
-    type: "Action",
-    componentType: "Server",
-    order: 99999,
-  },
 };
 
 export const initialData: Record<string, Card> = {
@@ -55,13 +45,72 @@ export const initialData: Record<string, Card> = {
     type: "Action",
     componentType: "Server",
   },
-  "User Service": {
-    name: "사용자 서비스",
-    description: "사용자 서비스 모듈",
+  "Ingress Controller": {
+    name: "Ingress Controller",
+    description: "Ingress Controller로 nginx를 사용합니다.",
     type: "Action",
     componentType: "Server",
   },
-  ...CustomServer,
+  "User Service": {
+    name: "사용자 인증 서비스",
+    description: "사용자 인증 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Subscription Service": {
+    name: "구독 서비스",
+    description: "구독 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Survey Service": {
+    name: "만족도/불편사항 관리 서비스",
+    description: "만족도/불편사항 관리 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Policy Service": {
+    name: "정책 서비스",
+    description: "정책 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Record Service": {
+    name: "이력 관리 서비스",
+    description: "이력 관리 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Audit Service": {
+    name: "정보 변경 관리 서비스",
+    description: "정보 변경 관리 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Statistics Service": {
+    name: "통계 관리 서비스",
+    description: "통계 관리 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Admin Service": {
+    name: "플랫폼 운영 관리 서비스",
+    description: "플랫폼 운영 관리 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "Notification Service": {
+    name: "알림 서비스",
+    description: "알림 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
+  "AI Service": {
+    name: "AI 서비스",
+    description: "AI 서비스 모듈",
+    type: "Action",
+    componentType: "Server",
+  },
   Feign: {
     name: "Feign",
     description:
@@ -74,6 +123,18 @@ export const initialData: Record<string, Card> = {
     description:
       "Kafka는 고성능 메시징 시스템으로, 마이크로서비스 간의 비동기 통신을 지원합니다. 이를 통해 서비스 간의 의존성을 줄이고, 느슨하게 결합된 아키텍처를 구현할 수 있습니다. 또한, 서비스 간의 이벤트를 실시간으로 전송하고 처리할 수 있습니다.",
     type: "Method",
+    componentType: "Etc",
+  },
+  Keycloak: {
+    name: "Keycloak",
+    description: "Keycloak입니다.",
+    type: "Method",
+    componentType: "Etc",
+  },
+  Database: {
+    name: "Database",
+    description: "데이터베이스입니다.",
+    type: "Database",
     componentType: "Etc",
   },
 };
@@ -89,8 +150,9 @@ const filterCardsByComponentType = (cards: Record<string, Card>) => {
   }, {} as Record<string, Record<string, Card>>);
 };
 
-export type EditCanvasCardType = "Trigger" | "Action" | "Method";
+export type EditCanvasCardType = "Trigger" | "Action" | "Method" | "Database";
 export type EditCanvasCardComponentType = "Server" | "Client" | "Etc";
+export type EditCanvasCardCardType = "Start" | "End" | "Many" | "Text";
 
 export const editCanvasCardComponents: EditCanvasCardComponentType[] = [
   "Client",
@@ -112,18 +174,9 @@ export const useEditCanvasCardStore = create<CardsState>((set) => ({
   addCards: (newCards) =>
     set((state) => {
       const updatedCards = { ...state.cards, ...newCards };
-      const sortedCards = Object.keys(updatedCards)
-        .sort(
-          (a, b) => (updatedCards[a].order ?? 0) - (updatedCards[b].order ?? 0)
-        )
-        .reduce((acc, key) => {
-          acc[key] = updatedCards[key];
-          return acc;
-        }, {} as Record<string, Card>);
-
       return {
-        cards: sortedCards,
-        filteredCards: filterCardsByComponentType(sortedCards),
+        cards: updatedCards,
+        filteredCards: filterCardsByComponentType(updatedCards),
       };
     }),
   updateCard: (key, card) =>

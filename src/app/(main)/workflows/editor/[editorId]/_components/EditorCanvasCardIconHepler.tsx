@@ -2,10 +2,14 @@
 import { EditorCanvasTypes } from "@/lib/types";
 import {
   AppWindow,
+  Box,
   Bus,
+  Database,
+  DoorOpen,
   HardDrive,
+  Lock,
   MousePointerClickIcon,
-  Plus,
+  Network,
   SearchCheck,
   TabletSmartphone,
 } from "lucide-react";
@@ -19,21 +23,33 @@ const EditorCanvasIconHelper = ({ type }: Props) => {
     case "App":
       return <TabletSmartphone className="flex-shrink-0" size={30} />;
     case "Spring Cloud Gateway":
-      return <HardDrive className="flex-shrink-0" size={30} />;
-    case "Custom Server":
-      return <Plus className="flex-shrink-0" size={30} />;
+    case "Ingress Controller":
+      return <DoorOpen className="flex-shrink-0" size={30} />;
     case "Eureka Discovery":
       return <SearchCheck className="flex-shrink-0" size={30} />;
     case "User Service":
+    case "Keycloak":
+      return <Lock className="flex-shrink-0" size={30} />;
+    case "Subscription Service":
+    case "Policy Service":
+    case "Survey Service":
+    case "Record Service":
+    case "Admin Service":
+    case "Audit Service":
+    case "Statistics Service":
+    case "Notification Service":
+    case "AI Service":
       return <HardDrive className="flex-shrink-0" size={30} />;
     case "Kafka":
-      return <Bus className="flex-shrink-0" size={20} />;
+      return <Bus className="flex-shrink-0" size={30} />;
     case "Feign":
-      return <Bus className="flex-shrink-0" size={20} />;
+      return <Network className="flex-shrink-0" size={30} />;
     case "Trigger":
       return <MousePointerClickIcon className="flex-shrink-0" size={30} />;
+    case "Database":
+      return <Database className="flex-shrink-0" size={30} />;
     default:
-      return <HardDrive className="flex-shrink-0" size={30} />;
+      return <Box className="flex-shrink-0" size={30} />;
   }
 };
 

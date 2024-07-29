@@ -8,9 +8,11 @@ export const EditUserProfileSchema = z.object({
 });
 
 export const NewNodeFormSchema = z.object({
+  componentType: z.string(),
   key: z.string().min(1, "필수 항목입니다."),
   name: z.string().min(1, "필수 항목입니다."),
   description: z.string().min(1, "필수 항목입니다."),
+  cardType: z.string(),
 });
 
 export const WorkflowFormSchema = z.object({

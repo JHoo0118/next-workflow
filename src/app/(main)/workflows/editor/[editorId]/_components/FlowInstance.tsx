@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useNodeConnections } from "@/providers/ConnectionsProvider";
+import { useEditCanvasCardStore } from "@/store/editCanvasStore";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -19,12 +20,20 @@ const FlowInstance = ({ children, edges, nodes }: Props) => {
   const pathname = usePathname();
   const [isFlow, setIsFlow] = useState([]);
   const { nodeConnection } = useNodeConnections();
+  const { cards } = useEditCanvasCardStore();
   const router = useRouter();
 
   const onFlowAutomation = useCallback(async () => {
+    const pNodes = nodes.map((node) => {
+      const key = node.type;
+      node.data.title = cards[key].name;
+      node.data["cardType"] = cards[key].cardType;
+      node.data["componentType"] = cards[key].componentType;
+      return node;
+    });
     const flow = await onCreateNodesEdges(
       pathname.split("/").pop()!,
-      JSON.stringify(nodes),
+      JSON.stringify(pNodes),
       JSON.stringify(edges),
       JSON.stringify(isFlow)
     );

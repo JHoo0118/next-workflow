@@ -15,35 +15,43 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { EditorNodeType, NewNodeFormSchema } from "@/lib/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { NewNodeFormSchema } from "@/lib/types";
 import { useModal } from "@/providers/ModalProvider";
-import { CustomServer, useEditCanvasCardStore } from "@/store/editCanvasStore";
+import {
+  EditCanvasCardCardType,
+  EditCanvasCardComponentType,
+  useEditCanvasCardStore,
+} from "@/store/editCanvasStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { XYPosition } from "reactflow";
-import { v4 } from "uuid";
 import { z } from "zod";
 
 type Props = {
   title?: string;
   subTitle?: string;
-  setNodes: (editors: EditorNodeType[]) => void;
-  position: XYPosition;
-  type: string;
 };
 
-const NewNodeForm = ({ subTitle, title, setNodes, position, type }: Props) => {
+const NewNodeForm = ({ subTitle, title }: Props) => {
   const { setClose } = useModal();
-  const { addCards } = useEditCanvasCardStore();
+  const { addCard } = useEditCanvasCardStore();
   const form = useForm<z.infer<typeof NewNodeFormSchema>>({
     mode: "onChange",
     resolver: zodResolver(NewNodeFormSchema),
     defaultValues: {
       key: "",
+      componentType: "Server",
       name: "",
       description: "",
+      cardType: "Many",
     },
   });
 
@@ -54,31 +62,23 @@ const NewNodeForm = ({ subTitle, title, setNodes, position, type }: Props) => {
     const key = form.getValues("key");
     const name = form.getValues("name");
     const description = form.getValues("description");
-    const newNode = {
-      id: v4(),
-      type,
-      position,
-      data: {
-        title: name,
-        description: description,
-        completed: false,
-        current: false,
-        metadata: {},
-        type: key,
-      },
-    };
-    addCards({
-      [key]: {
-        name,
-        description,
-        type: "Action",
-        componentType: "Server",
-      },
-      ...CustomServer,
+    const componentType = form.getValues(
+      "componentType"
+    ) as EditCanvasCardComponentType;
+    const cardType = form.getValues("cardType") as EditCanvasCardCardType;
+
+    addCard(key, {
+      name,
+      description,
+      type: "Action",
+      componentType,
+      cardType,
     });
 
+    form.reset();
+
     //@ts-ignore
-    setNodes((nds) => nds.concat(newNode));
+    // setNodes((nds) => nds.concat(newNode));
     setClose();
   };
 
@@ -96,6 +96,33 @@ const NewNodeForm = ({ subTitle, title, setNodes, position, type }: Props) => {
             onSubmit={form.handleSubmit(handleSubmit)}
             className="flex flex-col gap-4 text-left"
           >
+            <FormField
+              disabled={isLoading}
+              control={form.control}
+              name="componentType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>노드 유형</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a verified email to display" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Client">클라이언트</SelectItem>
+                      <SelectItem value="Server">서버</SelectItem>
+                      <SelectItem value="Etc">기타</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               disabled={isLoading}
               control={form.control}
@@ -138,6 +165,34 @@ const NewNodeForm = ({ subTitle, title, setNodes, position, type }: Props) => {
                 </FormItem>
               )}
             />
+            <FormField
+              disabled={isLoading}
+              control={form.control}
+              name="cardType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>연결 유형</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a verified email to display" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Start">시작</SelectItem>
+                      <SelectItem value="End">끝</SelectItem>
+                      <SelectItem value="Many">다중</SelectItem>
+                      <SelectItem value="Text">텍스트</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <Button className="mt-4" disabled={isLoading} type="submit">
               {isLoading ? (
                 <>

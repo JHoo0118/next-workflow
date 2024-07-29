@@ -16,7 +16,6 @@ import { EditorCanvasCardType } from "@/lib/types";
 import { useEditor } from "@/providers/EditorProvider";
 import { useMemo } from "react";
 import { Position, useNodeId } from "reactflow";
-import CustomHandle from "./CustomHandle";
 import EditorCanvasIconHelper from "./EditorCanvasCardIconHepler";
 
 import {
@@ -27,10 +26,15 @@ import {
 } from "@/components/ui/card";
 import { useEditCanvasCardStore } from "@/store/editCanvasStore";
 import useTabStore from "@/store/tabStore";
+import CustomBidirectionalHandle from "./CustomBidirectionalHandle";
 
 type Props = {};
 
-const EditorCanvasCardSingle = ({ data }: { data: EditorCanvasCardType }) => {
+const EditorCanvasCardSingleEnd = ({
+  data,
+}: {
+  data: EditorCanvasCardType;
+}) => {
   const { dispatch, state } = useEditor();
   const { setTab } = useTabStore();
   const { cards } = useEditCanvasCardStore();
@@ -41,15 +45,11 @@ const EditorCanvasCardSingle = ({ data }: { data: EditorCanvasCardType }) => {
 
   return (
     <>
-      {data.type !== "Trigger" &&
-        data.type !== "Web" &&
-        data.type !== "App" && (
-          <CustomHandle
-            type="target"
-            position={Position.Left}
-            style={{ zIndex: 100 }}
-          />
-        )}
+      <CustomBidirectionalHandle
+        type="target"
+        position={Position.Left}
+        style={{ zIndex: 100 }}
+      />
       <Card
         onClick={(e) => {
           e.stopPropagation();
@@ -68,7 +68,9 @@ const EditorCanvasCardSingle = ({ data }: { data: EditorCanvasCardType }) => {
         <CardHeader className="flex flex-row items-center gap-4">
           <div>{logo}</div>
           <div>
-            <CardTitle className="text-md">{cards[data.title].name}</CardTitle>
+            <CardTitle className="text-md">
+              {cards[data.title]?.name ?? data.title}
+            </CardTitle>
             <CardDescription>
               {/* <p className="text-xs text-muted-foreground/50">
                 <b className="text-muted-foreground/80">ID: </b>
@@ -85,9 +87,8 @@ const EditorCanvasCardSingle = ({ data }: { data: EditorCanvasCardType }) => {
           className={"absolute left-3 top-4 h-2 w-2 rounded-full bg-green-500"}
         ></div>
       </Card>
-      <CustomHandle type="source" position={Position.Right} id="a" />
     </>
   );
 };
 
-export default EditorCanvasCardSingle;
+export default EditorCanvasCardSingleEnd;

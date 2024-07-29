@@ -17,13 +17,13 @@ const CustomBidirectionalHandle = (props: Props) => {
       <Handle
         {...props}
         type="target"
-        className="!-bottom-2 !h-4 !w-4 dark:bg-neutral-800"
+        className="!-bottom-2 !h-4 !w-4 !bg-neutral-400 dark:!bg-neutral-800"
         isValidConnection={() => true}
       />
       <Handle
         {...props}
         type="source"
-        className="!-bottom-2 !h-4 !w-4 dark:bg-neutral-800"
+        className="!-bottom-2 !h-4 !w-4 !bg-neutral-400 dark:!bg-neutral-800"
         isValidConnection={() => true}
       />
     </>

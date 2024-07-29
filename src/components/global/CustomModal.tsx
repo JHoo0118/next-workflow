@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/drawer";
 import { useModal } from "@/providers/ModalProvider";
 
+import { cn } from "@/lib/utils";
+import { ClassValue } from "clsx";
 import React from "react";
 import { Button } from "../ui/button";
 
@@ -17,9 +19,16 @@ type Props = {
   subheading: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  size?: ClassValue;
 };
 
-const CustomModal = ({ children, subheading, title, defaultOpen }: Props) => {
+const CustomModal = ({
+  children,
+  subheading,
+  title,
+  defaultOpen,
+  size,
+}: Props) => {
   const { isOpen, setClose } = useModal();
   const handleClose = () => setClose();
 
@@ -28,7 +37,12 @@ const CustomModal = ({ children, subheading, title, defaultOpen }: Props) => {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="text-center">{title}</DrawerTitle>
-          <DrawerDescription className="text-center flex flex-col items-center gap-4 h-96 overflow-scroll">
+          <DrawerDescription
+            className={cn(
+              "text-center flex flex-col items-center gap-4 overflow-scroll",
+              size ?? "h-96"
+            )}
+          >
             {subheading}
             {children}
           </DrawerDescription>

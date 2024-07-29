@@ -6,7 +6,7 @@ type Props = {};
 
 const Page = (props: Props) => {
   return (
-    <div className="h-screen">
+    <div className="h-full">
       <EditorProvider>
         <ConnectionsProvider>
           <EditorCanvas />

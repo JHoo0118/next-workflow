@@ -10,7 +10,7 @@ import useTabStore from "@/store/tabStore";
 
 type Props = {};
 
-const EditorCanvasCardSimple = ({ data }: { data: EditorCanvasCardType }) => {
+const EditorCanvasCardText = ({ data }: { data: EditorCanvasCardType }) => {
   const { dispatch, state } = useEditor();
   const { setTab } = useTabStore();
   const { cards } = useEditCanvasCardStore();
@@ -34,7 +34,7 @@ const EditorCanvasCardSimple = ({ data }: { data: EditorCanvasCardType }) => {
             });
           setTab("details");
         }}
-        className="relative max-w-[120px] dark:border-muted-foreground/70"
+        className="relative max-w-[120px] border-0 shadow-none bg-transparent"
       >
         <CardHeader className="flex space-x-0 space-y-0 p-2 flex-row items-center gap-2">
           <div>{logo}</div>
@@ -49,4 +49,4 @@ const EditorCanvasCardSimple = ({ data }: { data: EditorCanvasCardType }) => {
   );
 };
 
-export default EditorCanvasCardSimple;
+export default EditorCanvasCardText;
