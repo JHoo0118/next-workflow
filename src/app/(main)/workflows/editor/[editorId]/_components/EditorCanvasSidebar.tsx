@@ -71,7 +71,7 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
             노드 추가하기
           </Button>
           {editCanvasCardComponents.map((componentType) => (
-            <>
+            <div key={componentType}>
               <h3>{mappingComponentTypeName[componentType]}</h3>
               {Object.entries(filteredCards[componentType]).map(
                 ([cardKey, cardValue]) => (
@@ -99,7 +99,7 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
                 )
               )}
               <Separator />
-            </>
+            </div>
           ))}
         </TabsContent>
         <TabsContent value="details" className="-mt-6">
